@@ -28,11 +28,12 @@ public class MainActivity extends ListActivity {
     ListView lv;
 
     private static final String STORAGE = Environment.getExternalStorageDirectory().toString() + "/Music/";
-    private ArrayList<File> songs = new ArrayList<>();
+    private ArrayList<MediaPlayer> songs = new ArrayList<>();
     int[] items = new int[]{R.raw.awari, R.raw.down, R.raw.mind, R.raw.wall};
     String[] songName = {"awari", "down", "mind", "wall"};
     private MediaPlayer mp = new MediaPlayer();
     private MediaPlayer[] mpArray = new MediaPlayer[items.length];
+    private File[] file;
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @Override
@@ -46,18 +47,18 @@ public class MainActivity extends ListActivity {
 
         for (int i = 0; i < items.length; i++) {
             mpArray[i] = MediaPlayer.create(this, items[i]);
+            songs.add(i,mpArray[i]);
 
-            Toast.makeText(this, String.valueOf(mpArray[i]), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, songs.get(i).toString(), Toast.LENGTH_LONG).show();
         }
-
 //        items = new String[mySongs.size()];
 //        for (int i = 0; i < mySongs.size(); i++) {
 //
 //            items[i] = mySongs.get(i).getName();
 //        }
 
-        ArrayAdapter<String> songs = new ArrayAdapter<>(getApplicationContext(), R.layout.song_list, songName);
-        lv.setAdapter(songs);
+        ArrayAdapter<MediaPlayer> adapter = new ArrayAdapter<>(getApplicationContext(), R.layout.song_list, songs);
+        lv.setAdapter(adapter);
 
 
         Button play = (Button) findViewById(R.id.button2);
@@ -90,20 +91,20 @@ public class MainActivity extends ListActivity {
     }
 
 
-    public ArrayList<File> songList(File file) {
-        File[] list = file.listFiles(new FileLocation());
-
-        try {
-            for (File singleFile : list) {
-                if (singleFile.getName().endsWith(".mp3")) {
-                    songs.add((singleFile));
-                }
-            }
-        } catch (Exception e) {
-            Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
-        }
-        return songs;
-    }
+//    public ArrayList<File> songList(File file) {
+//        File[] list = file.listFiles(new FileLocation());
+//
+//        try {
+//            for (File singleFile : list) {
+//                if (singleFile.getName().endsWith(".mp3")) {
+//                    songs.add((singleFile));
+//                }
+//            }
+//        } catch (Exception e) {
+//            Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+//        }
+//        return songs;
+//    }
 
 
 }
