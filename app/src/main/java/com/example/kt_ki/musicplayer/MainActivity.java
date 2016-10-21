@@ -30,7 +30,7 @@ class FileLocation implements FilenameFilter {
 
 public class MainActivity extends ListActivity {
     ListView lv;
-    private final String Media_Path = new String("/sdcard/");
+    private final String Media_Path = new String("/sdcard");
     private List<String> songs = new ArrayList<String>();
     private MediaPlayer mp = new MediaPlayer();
 
@@ -43,6 +43,13 @@ public class MainActivity extends ListActivity {
         lv = getListView();
 
         getSongList();
+
+        mp = MediaPlayer.create(this, R.raw.down);
+
+        String[] check = new String[]{"song1", "song2"};
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.song_list, check);
+        setListAdapter(adapter);
 
 
         Button play = (Button) findViewById(R.id.button2);
@@ -69,6 +76,7 @@ public class MainActivity extends ListActivity {
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
+
 
     }
 
