@@ -2,6 +2,7 @@ package com.example.kt_ki.musicplayer;
 
 import android.app.ListActivity;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -14,26 +15,24 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 class FileLocation implements FilenameFilter {
 
     @Override
     public boolean accept(File dir, String name) {
-        return true;
+        return (name.endsWith(".mp3") || name.endsWith(".MP3"));
     }
 }
 
 public class MainActivity extends ListActivity {
     ListView lv;
-
-    private static final String STORAGE = Environment.getExternalStorageDirectory().toString() + "/Music/";
-    private ArrayList<MediaPlayer> songs = new ArrayList<>();
-    int[] items = new int[]{R.raw.awari, R.raw.down, R.raw.mind, R.raw.wall};
-    String[] songName = {"awari", "down", "mind", "wall"};
+    private final String Media_Path = new String("/sdcard/");
+    private List<String> songs = new ArrayList<String>();
     private MediaPlayer mp = new MediaPlayer();
-    private MediaPlayer[] mpArray = new MediaPlayer[items.length];
-    private File[] file;
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @Override
@@ -42,23 +41,8 @@ public class MainActivity extends ListActivity {
         setContentView(R.layout.activity_main);
 
         lv = getListView();
-//        File directory = new File(STORAGE);
-//        ArrayList<File> mySongs = songList(directory);
 
-        for (int i = 0; i < items.length; i++) {
-            mpArray[i] = MediaPlayer.create(this, items[i]);
-            songs.add(i,mpArray[i]);
-
-            Toast.makeText(this, songs.get(i).toString(), Toast.LENGTH_LONG).show();
-        }
-//        items = new String[mySongs.size()];
-//        for (int i = 0; i < mySongs.size(); i++) {
-//
-//            items[i] = mySongs.get(i).getName();
-//        }
-
-        ArrayAdapter<MediaPlayer> adapter = new ArrayAdapter<>(getApplicationContext(), R.layout.song_list, songs);
-        lv.setAdapter(adapter);
+        getSongList();
 
 
         Button play = (Button) findViewById(R.id.button2);
@@ -86,25 +70,24 @@ public class MainActivity extends ListActivity {
     protected void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
 
-        Object o = this.lv.getCheckedItemPosition();
-        Toast.makeText(getApplicationContext(), o.toString(), Toast.LENGTH_LONG).show();
     }
 
 
-//    public ArrayList<File> songList(File file) {
-//        File[] list = file.listFiles(new FileLocation());
-//
-//        try {
-//            for (File singleFile : list) {
-//                if (singleFile.getName().endsWith(".mp3")) {
-//                    songs.add((singleFile));
-//                }
-//            }
-//        } catch (Exception e) {
-//            Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
-//        }
-//        return songs;
-//    }
+    public void getSongList() {
+        File home = new File(Media_Path);
 
+        try {
+            if (home.listFiles(new FileLocation()).length > 0) {
+                for (File file : home.listFiles(new FileLocation())) {
+                    songs.add(file.getName());
+                }
+            }
+        }catch (NullPointerException n){
+            n.printStackTrace();
+        }
 
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.song_list, songs);
+        setListAdapter(adapter);
+
+    }
 }
