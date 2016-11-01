@@ -3,6 +3,7 @@ package com.example.kt_ki.musicplayer;
 import android.Manifest;
 import android.app.ListActivity;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
@@ -10,8 +11,12 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.RequiresApi;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -21,18 +26,12 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-class FileLocation implements FilenameFilter {
+import static com.google.android.gms.internal.zzs.TAG;
 
-    @Override
-    public boolean accept(File dir, String name) {
-        return (name.endsWith(".mp3") || name.endsWith(".MP3"));
-    }
-}
 
 public class MainActivity extends ListActivity {
     ListView lv;
@@ -43,13 +42,14 @@ public class MainActivity extends ListActivity {
     int currentViewPosition = 0;
 
     List<File> files;
-    private ArrayList<String> songs = new ArrayList<String>();
+    private ArrayList<String> songs = new ArrayList<>();
 
     double startTime = 0;
     double finalTime = 0;
     int oneTimeOnly = 0;
 
     Handler handler = new Handler();
+
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @Override
@@ -82,12 +82,7 @@ public class MainActivity extends ListActivity {
         play.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mp == null) {
-                    mp = MediaPlayer.create(MainActivity.this, Uri.fromFile(files.get(currentViewPosition)));
-                    mp.start();
-                } else if (!mp.isPlaying()) {
-                    mp.start();
-                }
+                mp.start();
 
             }
         });
@@ -121,7 +116,6 @@ public class MainActivity extends ListActivity {
                 } catch (Exception e) {
                     currentViewPosition++;
                     Toast.makeText(MainActivity.this, "No more songs", Toast.LENGTH_SHORT).show();
-
                 }
             }
         });
@@ -154,16 +148,16 @@ public class MainActivity extends ListActivity {
             }
         });
 
+
         repeat.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
+                if (isChecked && mp.isPlaying()) {
                     mp.setLooping(true);
                     Toast.makeText(MainActivity.this, "Loop Is On", Toast.LENGTH_SHORT).show();
-                } else {
+                } else if (!mp.equals(mp.isPlaying())){
                     mp.setLooping(false);
                     Toast.makeText(MainActivity.this, "Loop Is Off", Toast.LENGTH_SHORT).show();
-
                 }
             }
         });
@@ -188,6 +182,23 @@ public class MainActivity extends ListActivity {
             }
         });
 
+        mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+
+                this.onCompletion(mp);
+                Log.i("Completion Listener","Song Complete");
+                Toast.makeText(MainActivity.this, "Finished" , Toast.LENGTH_SHORT).show();
+                mp.reset();
+                try {
+                    mp.setDataSource(MainActivity.this, Uri.fromFile(files.get(currentViewPosition + 1)));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                mp = MediaPlayer.create(MainActivity.this, Uri.fromFile(files.get(currentViewPosition + 1)));
+                mp.start();
+            }
+        });
 
     }
 
@@ -196,9 +207,7 @@ public class MainActivity extends ListActivity {
         ArrayList<File> inFiles = new ArrayList<>();
         File[] files = parentDir.listFiles();
         try {
-            if (ContextCompat.checkSelfPermission(this,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    != PackageManager.PERMISSION_GRANTED) {
+            if (isStoragePermissionGranted()) {
                 for (File file : files) {
                     if (file.isDirectory()) {
                         inFiles.addAll(getListFiles(file));
@@ -216,6 +225,35 @@ public class MainActivity extends ListActivity {
         return inFiles;
     }
 
+    public  boolean isStoragePermissionGranted() {
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_GRANTED) {
+                Log.v(TAG,"Permission is granted");
+                return true;
+            } else {
+
+                Log.v(TAG,"Permission is revoked");
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+                return false;
+            }
+        }
+        else { //permission is automatically granted on sdk<23 upon installation
+            Log.v(TAG,"Permission is granted");
+            return true;
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(grantResults[0]== PackageManager.PERMISSION_GRANTED){
+            Log.v(TAG,"Permission: "+permissions[0]+ "was "+grantResults[0]);
+            //resume tasks needing this permission
+            getListFiles(new File(Media_Path));
+        }
+    }
+
 
     private Runnable UpdateSongTime = new Runnable() {
         public void run() {
@@ -230,16 +268,14 @@ public class MainActivity extends ListActivity {
     protected void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
         position = lv.getPositionForView(v);
-
-
         for (int i = 0; i < files.size(); i++) {
             if (position == i) {
                 mp.reset();
-                try {
-                    mp.setDataSource(this, Uri.fromFile(files.get(i)));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+//                try {
+//                    mp.setDataSource(this, Uri.fromFile(files.get(i)));
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
                 mp = MediaPlayer.create(this, Uri.fromFile(files.get(i)));
                 Toast.makeText(this, songs.get(i), Toast.LENGTH_SHORT).show();
                 mp.start();
@@ -247,6 +283,7 @@ public class MainActivity extends ListActivity {
             }
         }
     }
+
 
     @Override
     protected void onDestroy() {
