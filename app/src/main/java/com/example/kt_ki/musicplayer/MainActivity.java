@@ -17,6 +17,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -34,21 +35,21 @@ import static com.google.android.gms.internal.zzs.TAG;
 
 
 public class MainActivity extends ListActivity {
-    ListView lv;
+
     private final String Media_Path = Environment.getExternalStorageDirectory().toString();
     private MediaPlayer mp = new MediaPlayer();
-
-    SeekBar seekBar;
     int currentViewPosition = 0;
+
+    Button play;
+    Button pause;
+    Button next;
+    Button previous;
+    ToggleButton repeat;
+    ListView lv;
+    SeekBar seekBar;
 
     List<File> files;
     private ArrayList<String> songs = new ArrayList<>();
-
-    double startTime = 0;
-    double finalTime = 0;
-    int oneTimeOnly = 0;
-
-    Handler handler = new Handler();
 
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
@@ -59,25 +60,20 @@ public class MainActivity extends ListActivity {
 
         lv = getListView();
 
-        final Button play = (Button) findViewById(R.id.btnPlay);
-        final Button pause = (Button) findViewById(R.id.btnPause);
-        final Button next = (Button) findViewById(R.id.btnNext);
-        final Button previous = (Button) findViewById(R.id.btnPre);
+        play = (Button) findViewById(R.id.btnPlay);
+        pause = (Button) findViewById(R.id.btnPause);
+        next = (Button) findViewById(R.id.btnNext);
+        previous = (Button) findViewById(R.id.btnPre);
 
-        final ToggleButton repeat = (ToggleButton) findViewById(R.id.toggleButton);
+        repeat = (ToggleButton) findViewById(R.id.toggleButton);
+
+        seekBar = (SeekBar) findViewById(R.id.seekBar);
 
         files = getListFiles(new File(Media_Path));
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.song_list, songs);
         setListAdapter(adapter);
 
-        seekBar = (SeekBar) findViewById(R.id.seekBar);
-        seekBar.setClickable(false);
-
-        if (oneTimeOnly == 0) {
-            seekBar.setMax((int) finalTime);
-            oneTimeOnly = 1;
-        }
 
         play.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -117,6 +113,7 @@ public class MainActivity extends ListActivity {
                     currentViewPosition++;
                     Toast.makeText(MainActivity.this, "No more songs", Toast.LENGTH_SHORT).show();
                 }
+                repeat.setChecked(false);
             }
         });
 
@@ -145,6 +142,7 @@ public class MainActivity extends ListActivity {
                     Toast.makeText(MainActivity.this, "No more songs", Toast.LENGTH_SHORT).show();
                 }
 
+                repeat.setChecked(false);
             }
         });
 
@@ -154,10 +152,10 @@ public class MainActivity extends ListActivity {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked && mp.isPlaying()) {
                     mp.setLooping(true);
-                    Toast.makeText(MainActivity.this, "Loop Is On", Toast.LENGTH_SHORT).show();
-                } else if (!mp.equals(mp.isPlaying())){
+                    Toast.makeText(MainActivity.this, "Repeat on", Toast.LENGTH_SHORT).show();
+                } else if (!mp.equals(mp.isPlaying())) {
                     mp.setLooping(false);
-                    Toast.makeText(MainActivity.this, "Loop Is Off", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Repeat Off", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -182,13 +180,15 @@ public class MainActivity extends ListActivity {
             }
         });
 
+
         mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
 
+
                 this.onCompletion(mp);
-                Log.i("Completion Listener","Song Complete");
-                Toast.makeText(MainActivity.this, "Finished" , Toast.LENGTH_SHORT).show();
+                Log.i("Completion Listener", "Song Complete");
+                Toast.makeText(MainActivity.this, "Finished", Toast.LENGTH_SHORT).show();
                 mp.reset();
                 try {
                     mp.setDataSource(MainActivity.this, Uri.fromFile(files.get(currentViewPosition + 1)));
@@ -225,21 +225,20 @@ public class MainActivity extends ListActivity {
         return inFiles;
     }
 
-    public  boolean isStoragePermissionGranted() {
+    public boolean isStoragePermissionGranted() {
         if (Build.VERSION.SDK_INT >= 23) {
             if (checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
                     == PackageManager.PERMISSION_GRANTED) {
-                Log.v(TAG,"Permission is granted");
+                Log.v(TAG, "Permission is granted");
                 return true;
             } else {
 
-                Log.v(TAG,"Permission is revoked");
+                Log.v(TAG, "Permission is revoked");
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
                 return false;
             }
-        }
-        else { //permission is automatically granted on sdk<23 upon installation
-            Log.v(TAG,"Permission is granted");
+        } else { //permission is automatically granted on sdk<23 upon installation
+            Log.v(TAG, "Permission is granted");
             return true;
         }
     }
@@ -247,21 +246,12 @@ public class MainActivity extends ListActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if(grantResults[0]== PackageManager.PERMISSION_GRANTED){
-            Log.v(TAG,"Permission: "+permissions[0]+ "was "+grantResults[0]);
+        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            Log.v(TAG, "Permission: " + permissions[0] + "was " + grantResults[0]);
             //resume tasks needing this permission
             getListFiles(new File(Media_Path));
         }
     }
-
-
-    private Runnable UpdateSongTime = new Runnable() {
-        public void run() {
-            startTime = mp.getCurrentPosition();
-            seekBar.setProgress((int) startTime);
-            handler.postDelayed(this, 100);
-        }
-    };
 
 
     @Override
