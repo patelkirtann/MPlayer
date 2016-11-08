@@ -86,17 +86,6 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
             @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
             public void onClick(View v) {
-//                if (!mp.isPlaying()) {
-//                    try {
-//                        mp.setDataSource(MainActivity.this , Uri.fromFile(files.get(currentSongPosition)));
-//                        mp.prepare();
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    }catch (IllegalStateException i){
-//                    }
-//                    mp = MediaPlayer.create(MainActivity.this, Uri.fromFile(files.get(currentSongPosition)));
-//                    playMusic();
-//                }
                 try {
                     if (mp.isPlaying()) {
                         pauseMusic();
@@ -176,6 +165,7 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
         repeat.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
                 if (isChecked && mp.isPlaying()) {
                     mp.setLooping(true);
                     Toast.makeText(MainActivity.this, "Repeat on", Toast.LENGTH_SHORT).show();
@@ -207,7 +197,6 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
             }
 
         });
-
     }
 
     private void playMusic() {
@@ -282,8 +271,6 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-//                    mp = MediaPlayer.create(this, Uri.fromFile(files.get(i)));
-//                    Toast.makeText(this, songs.get(i).replace(".mp3", ""), Toast.LENGTH_SHORT).show();
                     currentSongPosition = position;
                     playMusic();
                 }
@@ -327,10 +314,8 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
         } catch (Exception e) {
             Toast.makeText(MainActivity.this, " No song selected ", Toast.LENGTH_SHORT).show();
         }
-
         handler.removeCallbacks(moveSeekBarThread);
         handler.postDelayed(moveSeekBarThread, 100);
-
     }
 
     private Runnable moveSeekBarThread = new Runnable() {
@@ -345,7 +330,7 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
 
                     handler.postDelayed(this, 100);
                     duration.post(mUpdateTime);
-                }else {
+                } else {
                     handler.removeCallbacks(this, 100);
                 }
             } catch (NullPointerException | IllegalStateException n) {
@@ -362,18 +347,18 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
             if (mp.isPlaying()) {
                 currentDuration = mp.getCurrentPosition();
                 updatePlayer(currentDuration);
-                duration.postDelayed(this, 1000);
-            }else {
+                duration.postDelayed(this, currentDuration);
+            } else {
                 duration.removeCallbacks(this);
             }
         }
     };
 
-    private void updatePlayer(int currentDuration){
+    private void updatePlayer(int currentDuration) {
         duration.setText("" + milliSecondsToTimer((long) currentDuration));
     }
 
-    public  String milliSecondsToTimer(long milliseconds) {
+    public String milliSecondsToTimer(long milliseconds) {
         String finalTimerString = "";
         String secondsString = "";
 
