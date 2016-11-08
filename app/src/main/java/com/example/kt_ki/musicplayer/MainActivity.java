@@ -42,7 +42,7 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
     Button stop;
     Button next;
     Button previous;
-    ToggleButton repeat;
+    Button repeat;
     ListView lv;
     ImageView iv;
     SeekBar seekBar;
@@ -69,7 +69,7 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
         next = (Button) findViewById(R.id.btnNext);
         previous = (Button) findViewById(R.id.btnPre);
 
-        repeat = (ToggleButton) findViewById(R.id.toggleButton);
+        repeat = (Button) findViewById(R.id.loop);
 
         seekBar = (SeekBar) findViewById(R.id.seekBar);
         seekBar.setOnSeekBarChangeListener(this);
@@ -108,6 +108,9 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
                 try {
                     if (mp.isPlaying() || mp != null) {
                         mp.stop();
+                        if (mp.isPlaying()){
+                            removeLoop();
+                        }
                         mp.release();
                         seekBar.setProgress(0);
                         play_pause.setBackgroundResource(android.R.drawable.ic_media_play);
@@ -158,24 +161,20 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
                     Toast.makeText(MainActivity.this, "No more songs", Toast.LENGTH_SHORT).show();
                 }
 
-                repeat.setChecked(false);
+               removeLoop();
             }
         });
 
-        repeat.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        repeat.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-
-                if (isChecked && mp.isPlaying()) {
-                    mp.setLooping(true);
-                    Toast.makeText(MainActivity.this, "Repeat on", Toast.LENGTH_SHORT).show();
-                } else if (!mp.equals(mp.isPlaying())) {
-                    mp.setLooping(false);
-                    Toast.makeText(MainActivity.this, "Repeat Off", Toast.LENGTH_SHORT).show();
+            public void onClick(View v) {
+                if (mp.isPlaying()){
+                    setLoop();
+                }else if (!mp.equals(mp.isPlaying())){
+                    removeLoop();
                 }
             }
         });
-
 
         mp.setOnErrorListener(new MediaPlayer.OnErrorListener() {
             @Override
@@ -197,6 +196,16 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
             }
 
         });
+    }
+
+    private void setLoop() {
+        mp.setLooping(true);
+        Toast.makeText(MainActivity.this, "Repeat on", Toast.LENGTH_SHORT).show();
+    }
+
+    private void removeLoop(){
+        mp.setLooping(false);
+        Toast.makeText(MainActivity.this, "Repeat off", Toast.LENGTH_SHORT).show();
     }
 
     private void playMusic() {
@@ -253,7 +262,7 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
 //            currentSongPosition = 0;
             Toast.makeText(MainActivity.this, "No more songs", Toast.LENGTH_SHORT).show();
         }
-        repeat.setChecked(false);
+        removeLoop();
     }
 
 
