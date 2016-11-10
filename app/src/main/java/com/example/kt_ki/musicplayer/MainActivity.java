@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.ActivityManager;
 import android.app.ListActivity;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
@@ -405,6 +406,7 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
         return finalTimerString;
     }
 
+
     private List<File> getListFiles(File parentDir) {
         ArrayList<File> inFiles = new ArrayList<>();
         File[] files = parentDir.listFiles();
@@ -458,11 +460,12 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
         mp.start();
     }
 
-//    @Override
-//    protected void onDestroy() {
-//        super.onDestroy();
-//        finish();
-//    }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mp.release();
+        System.exit(0);
+    }
 
 }
 
