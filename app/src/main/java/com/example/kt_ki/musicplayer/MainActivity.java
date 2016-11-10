@@ -1,10 +1,8 @@
 package com.example.kt_ki.musicplayer;
 
 import android.Manifest;
-import android.app.ActivityManager;
 import android.app.ListActivity;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
@@ -17,7 +15,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -43,12 +40,9 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
     Button previous;
     Button repeat;
     ListView lv;
-    ImageView iv;
     SeekBar seekBar;
     TextView duration;
 
-    private int mediaPos = 0;
-    private int mediaMax = 0;
     Handler handler;
 
     List<File> files;
@@ -80,7 +74,7 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.song_list, songs);
         setListAdapter(adapter);
 
-
+//      Play and Pause button events
         play_pause.setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
@@ -101,6 +95,7 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
             }
         });
 
+//      Stop button event
         stop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -114,10 +109,8 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
                         play_pause.setBackgroundResource(android.R.drawable.ic_media_play);
                         mp.reset();
 
-//                        mp = MediaPlayer.create(MainActivity.this , Uri.fromFile(files.get(currentSongPosition)));
                         mp.setDataSource(MainActivity.this, Uri.fromFile(files.get(currentSongPosition)));
                         mp.prepare();
-
                     } else {
                         Toast.makeText(MainActivity.this, "select song from list", Toast.LENGTH_SHORT).show();
                     }
@@ -129,6 +122,7 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
             }
         });
 
+//      Next button event
         next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -136,43 +130,19 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
             }
         });
 
+//      Previous button event
         previous.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                try {
-                    if (currentSongPosition >= 0) {
-                        mp.reset();
-                        try {
-                            mp.setDataSource(MainActivity.this, Uri.fromFile(files.get(currentSongPosition - 1)));
-                            mp.prepare();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-//                        mp = MediaPlayer.create(MainActivity.this, Uri.fromFile(files.get(currentSongPosition - 1)));
-                        currentSongPosition--;
-//                        Toast.makeText(MainActivity.this, songs.get(currentSongPosition), Toast.LENGTH_SHORT).show();
-                        playMusic();
-                    }
-                } catch (IndexOutOfBoundsException e) {
-//                    currentSongPosition = 0;
-                    seekBar.setProgress(0);
-                    play_pause.setBackgroundResource(android.R.drawable.ic_media_play);
-                    Toast.makeText(MainActivity.this, "No more songs", Toast.LENGTH_SHORT).show();
-                } catch (Exception e) {
-//                    currentSongPosition = 0;
-                    Toast.makeText(MainActivity.this, "No more songs", Toast.LENGTH_SHORT).show();
-                }
-                if (mp.isLooping()) {
-                    removeLoop();
-                }
+                previousMusic();
             }
         });
 
+//      Repeat button event
         repeat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mp.isPlaying() && !mp.isLooping() && mp!= null) {
+                if (mp.isPlaying() && !mp.isLooping() && mp != null) {
                     setLoop();
                 } else {
                     removeLoop();
@@ -180,6 +150,7 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
             }
         });
 
+//      Error Listener when no song is selected....Goes to OnCompletionListener for next step
         mp.setOnErrorListener(new MediaPlayer.OnErrorListener() {
             @Override
             public boolean onError(MediaPlayer mp, int what, int extra) {
@@ -188,10 +159,10 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
             }
         });
 
+//      OnCompletion executes when every song ends.
         mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
-//                Toast.makeText(MainActivity.this, " completed ", Toast.LENGTH_SHORT).show();
                 if (mp.isLooping()) {
                     playMusic();
                 } else {
@@ -202,29 +173,20 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
         });
     }
 
-    private void setLoop() {
-        mp.setLooping(true);
-        repeat.setBackgroundResource(R.drawable.repeat_on);
-        Toast.makeText(MainActivity.this, "Repeat on", Toast.LENGTH_SHORT).show();
-    }
-
-    private void removeLoop() {
-        mp.setLooping(false);
-        repeat.setBackgroundResource(R.drawable.repeat_off);
-        Toast.makeText(MainActivity.this, "Repeat off", Toast.LENGTH_SHORT).show();
-    }
-
+    //      Play function
     private void playMusic() {
         mp.start();
         play_pause.setBackgroundResource(android.R.drawable.ic_media_pause);
-        initMediaPlayer();
+        initSeekBarProgress();
     }
 
+    //      Pause function
     private void pauseMusic() {
         mp.pause();
         play_pause.setBackgroundResource(android.R.drawable.ic_media_play);
     }
 
+    //      Next function
     private void nextMusic() {
         try {
             if (currentSongPosition < songs.size()) {
@@ -233,30 +195,26 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
                 }
                 mp.reset();
                 try {
-                    mp.setDataSource(MainActivity.this, Uri.fromFile(files.get(currentSongPosition + 1)));
+                    mp.setDataSource(MainActivity.this, Uri.fromFile(files.get(currentSongPosition + 1))); // Sets the source of the next song
                     mp.prepare();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-//                mp = MediaPlayer.create(MainActivity.this, Uri.fromFile(files.get(currentSongPosition++)));
                 currentSongPosition++;
-//                        Toast.makeText(MainActivity.this, songs.get(currentSongPosition), Toast.LENGTH_SHORT).show();
                 playMusic();
             } else if (currentSongPosition > songs.size()) {
                 mp.reset();
                 try {
-                    mp.setDataSource(MainActivity.this, Uri.fromFile(files.get(0)));
+                    mp.setDataSource(MainActivity.this, Uri.fromFile(files.get(0))); // starts from the very first song if all songs has been played
                     mp.prepare();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-//                mp = MediaPlayer.create(MainActivity.this, Uri.fromFile(files.get(0)));
                 playMusic();
             }
         } catch (IndexOutOfBoundsException e) {
             currentSongPosition = 0;
             seekBar.setProgress(0);
-//            Toast.makeText(MainActivity.this, "No more songs", Toast.LENGTH_SHORT).show();
             mp.reset();
             try {
                 mp.setDataSource(MainActivity.this, Uri.fromFile(files.get(currentSongPosition)));
@@ -264,29 +222,66 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
             } catch (IOException i) {
                 e.printStackTrace();
             }
-//                mp = MediaPlayer.create(MainActivity.this, Uri.fromFile(files.get(0)));
             playMusic();
-
         } catch (Exception e) {
-//            currentSongPosition = 0;
             Toast.makeText(MainActivity.this, "No more songs", Toast.LENGTH_SHORT).show();
         }
     }
 
+    //      Previous function
+    private void previousMusic() {
+        try {
+            if (currentSongPosition >= 0) {
+                mp.reset();
+                try {
+                    mp.setDataSource(MainActivity.this, Uri.fromFile(files.get(currentSongPosition - 1)));
+                    mp.prepare();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                currentSongPosition--;
+                playMusic();
+            }
+        } catch (IndexOutOfBoundsException e) {
+            seekBar.setProgress(0);
+            play_pause.setBackgroundResource(android.R.drawable.ic_media_play);
+            Toast.makeText(MainActivity.this, "No more songs", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(MainActivity.this, "No more songs", Toast.LENGTH_SHORT).show();
+        }
+        if (mp.isLooping()) {
+            removeLoop();
+        }
+    }
 
+    //      Start Repeating a song
+    private void setLoop() {
+        mp.setLooping(true);
+        repeat.setBackgroundResource(R.drawable.repeat_on);
+        Toast.makeText(MainActivity.this, "Repeat on", Toast.LENGTH_SHORT).show();
+    }
+
+    //      Stops Repeating a song
+    private void removeLoop() {
+        mp.setLooping(false);
+        repeat.setBackgroundResource(R.drawable.repeat_off);
+        Toast.makeText(MainActivity.this, "Repeat off", Toast.LENGTH_SHORT).show();
+    }
+
+    //      onListItemClick Executes when ListView item gets clicked
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
         try {
-            position = lv.getPositionForView(v);
+            position = lv.getPositionForView(v); // Takes the item position
             for (int i = 0; i < files.size(); i++) {
                 if (position == i) {
-                    if (mp.isLooping()){
+                    if (mp.isLooping()) {
                         removeLoop();
                     }
                     mp.reset();
                     try {
-                        mp.setDataSource(this, Uri.fromFile(files.get(i)));
+                        mp.setDataSource(this, Uri.fromFile(files.get(i))); // Assigning the List clicked Item to Media Player Source
                         mp.prepare();
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -300,7 +295,7 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
         }
     }
 
-
+//  When Song gets Start , the SeekBar process gets changed here
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
         try {
@@ -310,7 +305,6 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
         } catch (Exception e) {
             Toast.makeText(MainActivity.this, "No song selected", Toast.LENGTH_SHORT).show();
         }
-
     }
 
     @Override
@@ -321,23 +315,25 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
     public void onStopTrackingTouch(SeekBar seekBar) {
     }
 
-    private void initMediaPlayer() {
+    //  SeekBar progress gets initialized here
+    private void initSeekBarProgress() {
         handler = new Handler();
         try {
             if (mp.isPlaying()) {
-                mediaPos = mp.getCurrentPosition();
-                mediaMax = mp.getDuration();
+                int mediaPos = mp.getCurrentPosition(); // gets current song position (in time)
+                int mediaMax = mp.getDuration(); // gets maximum duration of song
 
-                seekBar.setMax(mediaMax);
-                seekBar.setProgress(mediaPos);
+                seekBar.setMax(mediaMax); // seekbar will seek until the mediaMax position
+                seekBar.setProgress(mediaPos); // set the  seekbar progress to mediaPos
             }
         } catch (Exception e) {
             Toast.makeText(MainActivity.this, " No song selected ", Toast.LENGTH_SHORT).show();
         }
         handler.removeCallbacks(moveSeekBarThread);
-        handler.postDelayed(moveSeekBarThread, 100);
+        handler.postDelayed(moveSeekBarThread, 100); // total delay before seek
     }
 
+    //      Runnable thread to move the seekbar every time when (mp.isPlaying==true)
     private Runnable moveSeekBarThread = new Runnable() {
 
         public void run() {
@@ -361,6 +357,7 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
         }
     };
 
+    //      Runnable thread will update the song time
     private Runnable mUpdateTime = new Runnable() {
         public void run() {
             int currentDuration;
@@ -380,10 +377,12 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
         }
     };
 
+    // Update the song duration in TextView object
     private void updatePlayer(int currentDuration) {
         duration.setText("" + milliSecondsToTimer((long) currentDuration));
     }
 
+    // Time conversion for hours, minutes and seconds for song duration
     public String milliSecondsToTimer(long milliseconds) {
         String finalTimerString = "";
         String secondsString = "";
@@ -407,18 +406,19 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
     }
 
 
+    //      getListFiles will Read the file from the SDcard .
     private List<File> getListFiles(File parentDir) {
-        ArrayList<File> inFiles = new ArrayList<>();
+        ArrayList<File> inFiles = new ArrayList<>(); // stores the files in arraylist
         File[] files = parentDir.listFiles();
         try {
             if (isStoragePermissionGranted()) {
                 for (File file : files) {
                     if (file.isDirectory()) {
-                        inFiles.addAll(getListFiles(file));
+                        inFiles.addAll(getListFiles(file)); // if file is derectory then move to the next file
                     } else {
-                        if (file.getName().endsWith(".mp3")) {
-                            inFiles.add(file);
-                            songs.add(file.getName());
+                        if (file.getName().endsWith(".mp3")) { // gets only ".mp3" files
+                            inFiles.add(file); // adding files to the ArrayList
+                            songs.add(file.getName()); // adding file names in the list(gets song name)
                         }
                     }
                 }
@@ -429,6 +429,7 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
         return inFiles;
     }
 
+    // Permission needed after version 23 . This will ask the permission if not allowed to access file from the SDcard
     public boolean isStoragePermissionGranted() {
         if (Build.VERSION.SDK_INT >= 23) {
             if (checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -447,6 +448,7 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
         }
     }
 
+    //      if Permission is  granted then will return the getListFiles function where it can read the files
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -455,11 +457,13 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
         }
     }
 
+    // when song is prepared
     @Override
     public void onPrepared(MediaPlayer mp) {
         mp.start();
     }
 
+    // when pressing the back button or closing the application
     @Override
     protected void onDestroy() {
         super.onDestroy();
