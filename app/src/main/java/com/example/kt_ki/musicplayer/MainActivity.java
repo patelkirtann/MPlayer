@@ -182,7 +182,7 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
         mp.setOnErrorListener(new MediaPlayer.OnErrorListener() {
             @Override
             public boolean onError(MediaPlayer mp, int what, int extra) {
-                Toast.makeText(MainActivity.this, " Error ", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, " Default Play ", Toast.LENGTH_SHORT).show();
                 return false;
             }
         });
@@ -227,6 +227,9 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
     private void nextMusic() {
         try {
             if (currentSongPosition < songs.size()) {
+                if (mp.isLooping()) {
+                    removeLoop();
+                }
                 mp.reset();
                 try {
                     mp.setDataSource(MainActivity.this, Uri.fromFile(files.get(currentSongPosition + 1)));
@@ -267,9 +270,6 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
 //            currentSongPosition = 0;
             Toast.makeText(MainActivity.this, "No more songs", Toast.LENGTH_SHORT).show();
         }
-        if (mp.isLooping()) {
-            removeLoop();
-        }
     }
 
 
@@ -280,6 +280,9 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
             position = lv.getPositionForView(v);
             for (int i = 0; i < files.size(); i++) {
                 if (position == i) {
+                    if (mp.isLooping()){
+                        removeLoop();
+                    }
                     mp.reset();
                     try {
                         mp.setDataSource(this, Uri.fromFile(files.get(i)));
