@@ -1,6 +1,7 @@
 package com.example.kt_ki.musicplayer;
 
 import android.Manifest;
+import android.app.ActivityManager;
 import android.app.ListActivity;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
@@ -15,14 +16,11 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CompoundButton;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,7 +30,7 @@ import java.util.List;
 import static com.google.android.gms.internal.zzs.TAG;
 
 
-public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChangeListener {
+public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChangeListener, MediaPlayer.OnPreparedListener {
 
     private final String Media_Path = Environment.getExternalStorageDirectory().toString();
     private MediaPlayer mp = new MediaPlayer();
@@ -107,16 +105,20 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
             public void onClick(View v) {
                 try {
                     if (mp.isPlaying() || mp != null) {
-                        mp.stop();
-                        if (mp.isPlaying()){
-                            removeLoop();
+                        if (mp.isLooping()) {
+                            repeat.setBackgroundResource(R.drawable.repeat_off);
                         }
-                        mp.release();
+                        mp.stop();
                         seekBar.setProgress(0);
                         play_pause.setBackgroundResource(android.R.drawable.ic_media_play);
+                        mp.reset();
 
-                        mp = MediaPlayer.create(MainActivity.this, Uri.fromFile(files.get(currentSongPosition)));
+//                        mp = MediaPlayer.create(MainActivity.this , Uri.fromFile(files.get(currentSongPosition)));
+                        mp.setDataSource(MainActivity.this, Uri.fromFile(files.get(currentSongPosition)));
                         mp.prepare();
+
+                    } else {
+                        Toast.makeText(MainActivity.this, "select song from list", Toast.LENGTH_SHORT).show();
                     }
                 } catch (NullPointerException | IllegalStateException n) {
                     Toast.makeText(MainActivity.this, "Music Stopped", Toast.LENGTH_SHORT).show();
@@ -160,17 +162,18 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
 //                    currentSongPosition = 0;
                     Toast.makeText(MainActivity.this, "No more songs", Toast.LENGTH_SHORT).show();
                 }
-
-               removeLoop();
+                if (mp.isLooping()) {
+                    removeLoop();
+                }
             }
         });
 
         repeat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mp.isPlaying()){
+                if (mp.isPlaying() && !mp.isLooping() && mp!= null) {
                     setLoop();
-                }else if (!mp.equals(mp.isPlaying())){
+                } else {
                     removeLoop();
                 }
             }
@@ -200,11 +203,13 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
 
     private void setLoop() {
         mp.setLooping(true);
+        repeat.setBackgroundResource(R.drawable.repeat_on);
         Toast.makeText(MainActivity.this, "Repeat on", Toast.LENGTH_SHORT).show();
     }
 
-    private void removeLoop(){
+    private void removeLoop() {
         mp.setLooping(false);
+        repeat.setBackgroundResource(R.drawable.repeat_off);
         Toast.makeText(MainActivity.this, "Repeat off", Toast.LENGTH_SHORT).show();
     }
 
@@ -262,7 +267,9 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
 //            currentSongPosition = 0;
             Toast.makeText(MainActivity.this, "No more songs", Toast.LENGTH_SHORT).show();
         }
-        removeLoop();
+        if (mp.isLooping()) {
+            removeLoop();
+        }
     }
 
 
@@ -353,12 +360,18 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
     private Runnable mUpdateTime = new Runnable() {
         public void run() {
             int currentDuration;
-            if (mp.isPlaying()) {
-                currentDuration = mp.getCurrentPosition();
-                updatePlayer(currentDuration);
-                duration.postDelayed(this, currentDuration);
-            } else {
-                duration.removeCallbacks(this);
+            try {
+                if (mp.isPlaying()) {
+                    currentDuration = mp.getCurrentPosition();
+                    updatePlayer(currentDuration);
+                    duration.postDelayed(this, currentDuration);
+                } else {
+                    duration.removeCallbacks(this);
+                }
+            } catch (IllegalStateException i) {
+                Toast.makeText(MainActivity.this, " Runnable state ", Toast.LENGTH_SHORT).show();
+            } catch (Exception e) {
+                Toast.makeText(MainActivity.this, " Runnable state ", Toast.LENGTH_SHORT).show();
             }
         }
     };
@@ -435,6 +448,11 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
         if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             getListFiles(new File(Media_Path));
         }
+    }
+
+    @Override
+    public void onPrepared(MediaPlayer mp) {
+        mp.start();
     }
 
 //    @Override
