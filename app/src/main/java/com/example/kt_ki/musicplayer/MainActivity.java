@@ -11,6 +11,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -40,6 +41,7 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
     Button previous;
     Button repeat;
     ListView lv;
+
     SeekBar seekBar;
     TextView duration;
 
@@ -416,7 +418,7 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
                     if (file.isDirectory()) {
                         inFiles.addAll(getListFiles(file)); // if file is derectory then move to the next file
                     } else {
-                        if (file.getName().endsWith(".mp3")) { // gets only ".mp3" files
+                        if (file.getName().endsWith(".mp3") && (file.length()/1024) >= 500) { // gets only ".mp3" files with size greater than 1000kb
                             inFiles.add(file); // adding files to the ArrayList
                             songs.add(file.getName()); // adding file names in the list(gets song name)
                         }
