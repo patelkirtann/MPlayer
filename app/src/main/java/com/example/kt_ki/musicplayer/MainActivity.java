@@ -304,7 +304,7 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
         try {
-            if (fromUser && mp.isPlaying()) {
+            if (fromUser) {
                 mp.seekTo(progress);
             }
         } catch (Exception e) {
