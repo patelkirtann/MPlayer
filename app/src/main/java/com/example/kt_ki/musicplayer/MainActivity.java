@@ -234,6 +234,9 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
     private void previousMusic() {
         try {
             if (currentSongPosition >= 0) {
+                if (mp.isLooping()) {
+                    removeLoop();
+                }
                 mp.reset();
                 try {
                     mp.setDataSource(MainActivity.this, Uri.fromFile(files.get(currentSongPosition - 1)));
