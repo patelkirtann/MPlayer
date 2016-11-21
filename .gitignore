@@ -19,3 +19,4 @@ libs/
 /gradlew.bat
 /settings.gradle
 /.gitignore
+/gradle/
