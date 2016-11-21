@@ -12,3 +12,10 @@ libs/
 =======
 .idea
 >>>>>>> 57d7726419013f94434cba5c55404b2697a61bab
+/build.gradle
+/FETCH_HEAD
+/gradle.properties
+/gradlew
+/gradlew.bat
+/settings.gradle
+/.gitignore

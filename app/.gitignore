@@ -8,3 +8,6 @@
 /captures
 .externalNativeBuild
 libs/
+/build.gradle
+/proguard-rules.pro
+/.gitignore

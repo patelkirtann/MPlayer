@@ -11,7 +11,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -23,6 +22,8 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,7 +50,6 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
 
     List<File> files;
     private ArrayList<String> songs = new ArrayList<>();
-
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @Override
@@ -173,6 +173,7 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
             }
 
         });
+
     }
 
     //      Play function
@@ -300,7 +301,7 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
         }
     }
 
-//  When Song gets Start , the SeekBar process gets changed here
+    //  When Song gets Start , the SeekBar process gets changed here
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
         try {
@@ -421,7 +422,7 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
                     if (file.isDirectory()) {
                         inFiles.addAll(getListFiles(file)); // if file is derectory then move to the next file
                     } else {
-                        if (file.getName().endsWith(".mp3") && (file.length()/1024) >= 500) { // gets only ".mp3" files with size greater than 1000kb
+                        if (file.getName().endsWith(".mp3") && (file.length() / 1024) >= 500) { // gets only ".mp3" files with size greater than 1000kb
                             inFiles.add(file); // adding files to the ArrayList
                             songs.add(file.getName()); // adding file names in the list(gets song name)
                         }
@@ -475,6 +476,5 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
         mp.release();
         System.exit(0);
     }
-
 }
 
