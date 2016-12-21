@@ -3,6 +3,9 @@ package com.example.kt_ki.musicplayer;
 import android.Manifest;
 import android.app.ListActivity;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
@@ -15,6 +18,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -22,8 +26,6 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,9 +48,16 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
     SeekBar seekBar;
     TextView duration;
 
+    TextView songName;
+
     Handler handler;
 
+    ImageView coverArt;
+
+//    ProgressDialog progressDialog;
+
     List<File> files;
+
     private ArrayList<String> songs = new ArrayList<>();
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
@@ -66,15 +75,24 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
 
         repeat = (Button) findViewById(R.id.loop);
 
+        songName = (TextView) findViewById(R.id.ItemName);
+
         seekBar = (SeekBar) findViewById(R.id.seekBar);
         seekBar.setOnSeekBarChangeListener(this);
 
         duration = (TextView) findViewById(R.id.duration);
 
-        files = getListFiles(new File(Media_Path));
+        coverArt = (ImageView) findViewById(R.id.img);
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.song_list, songs);
-        setListAdapter(adapter);
+//        Toast.makeText(MainActivity.this, "OnCreated ", Toast.LENGTH_SHORT).show();
+
+        files = getListFiles(new File(Media_Path));
+        this.setListAdapter(new ArrayAdapter<>(
+                this ,R.layout.detailed_list, R.id.ItemName, songs));
+
+//        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.song_list, songs);
+//        setListAdapter(adapter);
+
 
 //      Play and Pause button events
         play_pause.setOnClickListener(new View.OnClickListener() {
@@ -180,6 +198,7 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
     private void playMusic() {
         mp.start();
         play_pause.setBackgroundResource(android.R.drawable.ic_media_pause);
+//        songName.startAnimation(AnimationUtils.loadAnimation(MainActivity.this , android.R.anim.slide_in_left));
         initSeekBarProgress();
     }
 
@@ -187,6 +206,7 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
     private void pauseMusic() {
         mp.pause();
         play_pause.setBackgroundResource(android.R.drawable.ic_media_play);
+//        songName.clearAnimation();
     }
 
     //      Next function
@@ -413,16 +433,19 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
 
 
     //      getListFiles will Read the file from the SDcard .
+
+
     private List<File> getListFiles(File parentDir) {
+
         ArrayList<File> inFiles = new ArrayList<>(); // stores the files in arraylist
         File[] files = parentDir.listFiles();
         try {
             if (isStoragePermissionGranted()) {
                 for (File file : files) {
                     if (file.isDirectory()) {
-                        inFiles.addAll(getListFiles(file)); // if file is derectory then move to the next file
+                        inFiles.addAll(getListFiles(file)); // if file is directory then move to the next file
                     } else {
-                        if (file.getName().endsWith(".mp3") && (file.length() / 1024) >= 500) { // gets only ".mp3" files with size greater than 1000kb
+                        if (file.getName().endsWith(".mp3") && (file.length() / 1024) >= 500) { // gets only ".mp3" files with size greater than 500kb
                             inFiles.add(file); // adding files to the ArrayList
                             songs.add(file.getName()); // adding file names in the list(gets song name)
                         }
@@ -434,6 +457,19 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
         }
         return inFiles;
     }
+
+//    public static Bitmap getImageFromMp3File(List<File> file) {
+//        MediaMetadataRetriever metaRetriever = new MediaMetadataRetriever();
+//        metaRetriever.setDataSource(String.valueOf(file));
+//        byte[] artByteArray = metaRetriever.getEmbeddedPicture();
+//        if (artByteArray != null) {
+//            Bitmap artBitmap = BitmapFactory.decodeByteArray(artByteArray, 0, artByteArray.length);
+//            metaRetriever.release();
+//            return artBitmap;
+//        }
+//        return null;
+//    }
+
 
     // Permission needed after version 23 . This will ask the permission if not allowed to access file from the SDcard
     public boolean isStoragePermissionGranted() {

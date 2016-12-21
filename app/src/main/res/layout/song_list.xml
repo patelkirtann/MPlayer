@@ -10,6 +10,7 @@
     android:paddingStart="20dp"
     android:textAlignment="viewStart"
     android:textColor="@android:color/white"
-    app:paddingEnd="20dp">
+    app:paddingEnd="20dp"
+    android:paddingLeft="20dp">
 
 </TextView>

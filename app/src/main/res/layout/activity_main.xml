@@ -1,30 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg"
+    android:background="@drawable/galaxy6"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.example.kt_ki.musicplayer.MainActivity">
 
-
-    <ListView
-        android:id="@+id/android:list"
-        style="@style/Widget.AppCompat.ListView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@+id/seekBar"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:choiceMode="singleChoice"
-        android:listSelector="@drawable/list_view_color"
-        android:textAlignment="gravity" />
 
     <Button
         android:id="@+id/btnNext"
@@ -61,15 +47,6 @@
         android:background="@drawable/stop_icon" />
 
 
-    <SeekBar
-        android:id="@+id/seekBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/btnStop"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="24dp"
-        android:layout_toLeftOf="@+id/duration" />
-
     <TextView
         android:id="@+id/duration"
         android:layout_width="50dp"
@@ -97,4 +74,25 @@
         android:layout_alignBottom="@+id/loop"
         android:layout_centerHorizontal="true"
         android:background="@android:drawable/ic_media_play" />
+
+    <ListView
+        android:id="@+id/android:list"
+        style="@style/Widget.AppCompat.ListView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:choiceMode="singleChoice"
+        android:listSelector="@drawable/list_view_color"
+        android:textAlignment="gravity"
+        android:layout_alignParentTop="true"
+        android:paddingBottom="10dp"
+        android:layout_above="@+id/seekBar" />
+
+    <SeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/btnNext"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:paddingTop="5dp"/>
 </RelativeLayout>
