@@ -3,9 +3,6 @@ package com.example.kt_ki.musicplayer;
 import android.Manifest;
 import android.app.ListActivity;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
@@ -67,6 +64,7 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
         setContentView(R.layout.activity_main);
 
         lv = getListView();
+        lv.setSelector(R.color.colour_highlight_grey);
 
         play_pause = (Button) findViewById(R.id.btnPlayPause);
         stop = (Button) findViewById(R.id.btnStop);
@@ -122,7 +120,7 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
                 try {
                     if (mp.isPlaying() || mp != null) {
                         if (mp.isLooping()) {
-                            repeat.setBackgroundResource(R.drawable.repeat_off);
+                            repeat.setBackgroundResource(R.drawable.repeat_offf);
                         }
                         mp.stop();
                         seekBar.setProgress(0);
@@ -198,6 +196,7 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
     private void playMusic() {
         mp.start();
         play_pause.setBackgroundResource(android.R.drawable.ic_media_pause);
+
 //        songName.startAnimation(AnimationUtils.loadAnimation(MainActivity.this , android.R.anim.slide_in_left));
         initSeekBarProgress();
     }
@@ -283,14 +282,14 @@ public class MainActivity extends ListActivity implements SeekBar.OnSeekBarChang
     //      Start Repeating a song
     private void setLoop() {
         mp.setLooping(true);
-        repeat.setBackgroundResource(R.drawable.repeat_on);
+        repeat.setBackgroundResource(R.drawable.repeat_onn);
         Toast.makeText(MainActivity.this, "Repeat on", Toast.LENGTH_SHORT).show();
     }
 
     //      Stops Repeating a song
     private void removeLoop() {
         mp.setLooping(false);
-        repeat.setBackgroundResource(R.drawable.repeat_off);
+        repeat.setBackgroundResource(R.drawable.repeat_offf);
         Toast.makeText(MainActivity.this, "Repeat off", Toast.LENGTH_SHORT).show();
     }
 
