@@ -9,7 +9,7 @@
     android:orientation="vertical"
     android:paddingStart="20dp"
     android:textAlignment="viewStart"
-    android:textColor="@android:color/white"
+    android:textColor="@android:color/holo_orange_light"
     app:paddingEnd="20dp"
     android:paddingLeft="20dp">
 
